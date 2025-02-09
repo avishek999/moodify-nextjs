@@ -1,13 +1,38 @@
 import { auth, signOut } from "@/libs/auth";
+
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import React from "react";
+import { getSpotifyToken } from "./api/api";
 
 const page = async () => {
   const session = await auth();
   if (!session) redirect("/sign-in");
 
-  console.log("session", session.expires);
+  getSpotifyToken();
+  const tokenData = await getSpotifyToken();
+  if (tokenData && tokenData.access_token) {
+    const artistUrl = "https://api.spotify.com/v1/artists/4Z8W4fKeB5YxbusRsdQVPb";
+    const artistRequestOptions: RequestInit = {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${tokenData.access_token}`
+        }
+    };
+
+    try {
+        const artistResponse = await fetch(artistUrl, artistRequestOptions);
+        if (!artistResponse.ok) {
+            throw new Error(`HTTP error! status: ${artistResponse.status}`);
+        }
+        const artistData = await artistResponse.json();
+        console.log("Artist data", artistData);
+    } catch (error) {
+        console.error("Error fetching artist data:", error);
+    }
+} else {
+    console.error("Failed to retrieve access token");
+}
 
   return (
     <>
@@ -26,6 +51,8 @@ const page = async () => {
           await signOut();
         }}
       >
+
+        
         <button>sign out</button>
       </form>
     </>
