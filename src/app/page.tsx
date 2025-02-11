@@ -2,13 +2,13 @@ import { auth, signOut } from "@/libs/auth";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import React from "react";
+import { getAccessToken } from "./api/api";
 
 const page = async () => {
   const session = await auth();
   if (!session) redirect("/sign-in");
 
-  console.log("session", session.expires);
-
+  // getAccessToken();
   return (
     <>
       <div>Hello {session.user?.name}</div>
